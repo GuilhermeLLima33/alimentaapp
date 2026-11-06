@@ -28,7 +28,7 @@ export function useEstatisticasUsuario() {
     }
 
     const consulta = query(
-      collection(db, "alimentos"),
+      collection(db, "minhasDoacoes"),
       where("criadoPor", "==", uid)
     );
 

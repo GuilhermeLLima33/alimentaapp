@@ -17,6 +17,8 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 
+import TelaDetalhesCobranca from "./Telas/TelaDetalhesCobranca";
+
 import {
   Poppins_400Regular,
   Poppins_500Medium,
@@ -42,9 +44,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { ResponsiveProvider } from "./utils/responsive";
 import { auth } from "./firebase";
 
-// MENU GLOBAL
-import NavegacaoGlobal from "./components/NavegacaoGlobal";
-
 // TELAS EXISTENTES
 import TelaSplash from "./Telas/TelaSplash";
 import Onboarding from "./Telas/Onboarding";
@@ -55,12 +54,21 @@ import TelaCadastrarDoacao from "./Telas/TelaCadastrarDoacao";
 import TelaMinhasDoacoes from "./Telas/TelaMinhasDoacoes";
 import TelaDetalhesDoacao from "./Telas/TelaDetalhesDoacao";
 import TelaDetalhesProduto from "./Telas/TelaDetalhesProduto";
+import TelaCarrinhoDoacoes from "./Telas/TelaCarrinhoDoacoes";
+import TelaSeuPedido from "./Telas/TelaSeuPedido";
 
 // NOVAS TELAS
 import TelaPerfil from "./Telas/TelaPerfil";
 import TelaEditarPerfil from "./Telas/TelaEditarPerfil";
 import TelaConquistas from "./Telas/TelaConquistas";
 import TelaCampanhas from "./Telas/TelaCampanhas";
+import TelaEventos from "./Telas/TelaEventos";
+import TelaDetalheCampanha from "./Telas/TelaDetalheCampanha";
+import TelaNotificacoes from "./Telas/TelaNotificacoes";
+import TelaAjudaSuporte from "./Telas/TelaAjudaSuporte";
+import TelaSobreAlimenta from "./Telas/TelaSobreAlimenta";
+import TelaConfiguracoes from "./Telas/TelaConfiguracoes";
+import TelaRecuperarSenha from "./Telas/TelaRecuperarSenha";
 
 const VERDE = "#006838";
 const FUNDO = "#FFFCF6";
@@ -173,11 +181,7 @@ export default function App() {
     setAbrirLoginDireto,
   ] = useState(false);
 
-  const [rotaAtual, setRotaAtual] =
-    useState("Home");
-
   const estavaLogado = useRef(false);
-  const navigationRef = useRef(null);
 
   // OBSERVAR FIREBASE AUTH
   useEffect(() => {
@@ -243,16 +247,6 @@ export default function App() {
     ? "TelaLogin"
     : "Splash";
 
-  function atualizarRota() {
-    const rota =
-      navigationRef.current
-        ?.getCurrentRoute?.()?.name;
-
-    if (rota) {
-      setRotaAtual(rota);
-    }
-  }
-
   return (
     <SafeAreaProvider>
       <ResponsiveProvider>
@@ -264,10 +258,7 @@ export default function App() {
         <CapturarErroDeTela>
           <View style={styles.aplicativo}>
             <NavigationContainer
-              ref={navigationRef}
               theme={tema}
-              onReady={atualizarRota}
-              onStateChange={atualizarRota}
             >
               <Stack.Navigator
                 key={
@@ -302,6 +293,20 @@ export default function App() {
                       }
                     />
 
+                    {/* DETALHES DE COBRANÇA */}
+                    <Stack.Screen
+                      name="DetalhesCobranca"
+                      component={TelaDetalhesCobranca}
+                      options={{ headerShown: false }}
+                    />
+
+                    {/* SEU PEDIDO */}
+                    <Stack.Screen
+                      name="TelaSeuPedido"
+                      component={TelaSeuPedido}
+                      options={{ headerShown: false }}
+                    />
+
                     {/* MINHAS DOAÇÕES */}
                     <Stack.Screen
                       name="TelaMinhasDoacoes"
@@ -318,6 +323,12 @@ export default function App() {
                     <Stack.Screen
                       name="TelaDetalhesProduto"
                       component={TelaDetalhesProduto}
+                    />
+
+                    {/* CARRINHO DE DOAÇÕES */}
+                    <Stack.Screen
+                      name="TelaCarrinhoDoacoes"
+                      component={TelaCarrinhoDoacoes}
                     />
 
                     {/* NOVO PERFIL */}
@@ -343,6 +354,36 @@ export default function App() {
                       name="TelaCampanhas"
                       component={TelaCampanhas}
                     />
+
+                    <Stack.Screen
+                      name="TelaEventos"
+                      component={TelaEventos}
+                    />
+
+                    <Stack.Screen
+                      name="TelaDetalheCampanha"
+                      component={TelaDetalheCampanha}
+                    />
+
+                    <Stack.Screen
+                      name="TelaNotificacoes"
+                      component={TelaNotificacoes}
+                    />
+
+                    <Stack.Screen
+                      name="TelaAjudaSuporte"
+                      component={TelaAjudaSuporte}
+                    />
+
+                    <Stack.Screen
+                      name="TelaSobreAlimenta"
+                      component={TelaSobreAlimenta}
+                    />
+
+                    <Stack.Screen
+                      name="TelaConfiguracoes"
+                      component={TelaConfiguracoes}
+                    />
                   </>
                 ) : (
                   <>
@@ -352,6 +393,18 @@ export default function App() {
                       options={{
                         gestureEnabled: false,
                       }}
+                    />
+
+                    <Stack.Screen
+                      name="DetalhesCobranca"
+                      component={TelaDetalhesCobranca}
+                      options={{ headerShown: false }}
+                    />
+
+                    <Stack.Screen
+                      name="TelaSeuPedido"
+                      component={TelaSeuPedido}
+                      options={{ headerShown: false }}
                     />
 
                     <Stack.Screen
@@ -368,18 +421,16 @@ export default function App() {
                       name="TelaLogin"
                       component={TelaLogin}
                     />
+
+                    <Stack.Screen
+                      name="TelaRecuperarSenha"
+                      component={TelaRecuperarSenha}
+                    />
                   </>
                 )}
               </Stack.Navigator>
             </NavigationContainer>
 
-            {/* MENU GLOBAL */}
-            {autenticado && (
-              <NavegacaoGlobal
-                navigationRef={navigationRef}
-                rotaAtual={rotaAtual}
-              />
-            )}
           </View>
         </CapturarErroDeTela>
       </ResponsiveProvider>

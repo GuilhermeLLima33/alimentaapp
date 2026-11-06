@@ -20,7 +20,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   signInWithEmailAndPassword,
-  sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
@@ -116,7 +115,7 @@ export default function TelaLogin({
           "Verifique sua conexão com a internet.",
 
         "auth/invalid-api-key":
-          "Confira a configuração do Firebase.",
+          "Não foi possível conectar. Tente novamente mais tarde.",
       };
 
       setErro(
@@ -125,45 +124,6 @@ export default function TelaLogin({
       );
     } finally {
       setOcupado(false);
-    }
-  }
-
-  // ======================================
-  // RECUPERAR SENHA
-  // ======================================
-
-  async function recuperarSenha() {
-    setErro("");
-    setAviso("");
-
-    const emailLimpo =
-      email.trim().toLowerCase();
-
-    if (!emailLimpo) {
-      setErro(
-        "Digite seu e-mail para recuperar a senha."
-      );
-      return;
-    }
-
-    try {
-      await sendPasswordResetEmail(
-        auth,
-        emailLimpo
-      );
-
-      setAviso(
-        "Se o e-mail estiver cadastrado, você receberá instruções de recuperação."
-      );
-    } catch (e) {
-      console.error(
-        "Erro na recuperação de senha:",
-        e
-      );
-
-      setErro(
-        "Não foi possível solicitar a recuperação."
-      );
     }
   }
 
@@ -239,12 +199,11 @@ export default function TelaLogin({
       >
         {/* FUNDO DECORATIVO ORIGINAL */}
         <Image
-          pointerEvents="none"
           source={require(
             "../assets/images/tabIcons/fundoCadastro.png"
           )}
           resizeMode="cover"
-          style={styles.imagemFundo}
+          style={[styles.imagemFundo, { pointerEvents: "none" }]}
         />
 
         {/* CONTEÚDO POR CIMA DO FUNDO */}
@@ -389,7 +348,11 @@ export default function TelaLogin({
 
                 {/* ESQUECEU A SENHA */}
                 <TouchableOpacity
-                  onPress={recuperarSenha}
+                  onPress={() =>
+                    navigation.navigate("TelaRecuperarSenha", {
+                      email: email.trim().toLowerCase(),
+                    })
+                  }
                   style={styles.esqueci}
                 >
                   <Text style={styles.esqueciTexto}>

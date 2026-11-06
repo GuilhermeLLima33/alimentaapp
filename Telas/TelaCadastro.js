@@ -226,7 +226,7 @@ export default function TelaCadastro({
           "Verifique sua conexão com a internet.",
 
         "auth/invalid-api-key":
-          "Confira a configuração do Firebase.",
+          "Não foi possível conectar. Tente novamente mais tarde.",
       };
 
       setErro(
@@ -264,12 +264,11 @@ export default function TelaCadastro({
       >
         {/* FUNDO ORIGINAL, SEM DEFORMAÇÃO */}
         <Image
-          pointerEvents="none"
           source={require(
             "../assets/images/tabIcons/fundoCadastro.png"
           )}
           resizeMode="cover"
-          style={styles.imagemFundo}
+          style={[styles.imagemFundo, { pointerEvents: "none" }]}
         />
 
         {/* CONTEÚDO POR CIMA DO FUNDO */}

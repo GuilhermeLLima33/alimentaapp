@@ -28,7 +28,7 @@ import {
 } from "firebase/auth";
 
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system/legacy";
+import * as FileSystem from "expo-file-system";
 
 import { auth } from "../firebase";
 
@@ -416,8 +416,8 @@ export default function TelaEditarPerfil({
             )}
 
             <Text style={styles.nota}>
-              Nome e e-mail são gerenciados pelo
-              Firebase. Telefone, nascimento e foto
+              Nome e e-mail são gerenciados pela
+              sua conta. Telefone, nascimento e foto
               ficam salvos neste aparelho; não são
               sincronizados entre dispositivos.
             </Text>
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
 
   conteudo: {
     padding: 19,
-    paddingBottom: 132,
+    paddingBottom: 30,
   },
 
   topo: {

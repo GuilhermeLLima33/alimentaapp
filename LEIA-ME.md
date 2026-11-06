@@ -17,6 +17,7 @@ Projeto React Native/Expo com React Navigation, Firebase Auth e Cloud Firestore.
 - NÃO crie outro projeto Firebase se as contas e o Firestore do `AlimentaMaisApp` continuam existindo.
 - Os 14 alimentos são FICTÍCIOS. Os preços de referência são aproximações anteriores para o TCC, não preços confirmados em tempo real. A retirada dos alimentos cadastrados para demonstração não existe.
 - Todas as doações do usuário são gravadas com `preco: "Gratuito"` e com o UID do usuário em `criadoPor`.
+- Doações confirmadas na tela de cobrança são salvas em `minhasDoacoes`; publique as regras atualizadas de `firestore.rules` para permitir o salvamento e a consulta privada desses registros.
 - Esta versão não implementa reserva, retirada, moderação sanitária ou gestão administrativa. Não utilize para doações reais sem implementar esses controles.
 - Google popup só funciona na web. No Expo Go, use email/senha.
 - O CPF exibido no cadastro é opcional e NÃO é armazenado.
