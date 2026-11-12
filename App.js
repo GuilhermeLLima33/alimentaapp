@@ -56,6 +56,7 @@ import TelaDetalhesDoacao from "./Telas/TelaDetalhesDoacao";
 import TelaDetalhesProduto from "./Telas/TelaDetalhesProduto";
 import TelaCarrinhoDoacoes from "./Telas/TelaCarrinhoDoacoes";
 import TelaSeuPedido from "./Telas/TelaSeuPedido";
+import TelaConfirmacaoDoacaoSimulada from "./Telas/TelaConfirmacaoDoacaoSimulada";
 
 // NOVAS TELAS
 import TelaPerfil from "./Telas/TelaPerfil";
@@ -307,6 +308,12 @@ export default function App() {
                       options={{ headerShown: false }}
                     />
 
+                    <Stack.Screen
+                      name="TelaConfirmacaoDoacaoSimulada"
+                      component={TelaConfirmacaoDoacaoSimulada}
+                      options={{ headerShown: false }}
+                    />
+
                     {/* MINHAS DOAÇÕES */}
                     <Stack.Screen
                       name="TelaMinhasDoacoes"
@@ -404,6 +411,12 @@ export default function App() {
                     <Stack.Screen
                       name="TelaSeuPedido"
                       component={TelaSeuPedido}
+                      options={{ headerShown: false }}
+                    />
+
+                    <Stack.Screen
+                      name="TelaConfirmacaoDoacaoSimulada"
+                      component={TelaConfirmacaoDoacaoSimulada}
                       options={{ headerShown: false }}
                     />
 
