@@ -16,6 +16,7 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 import { auth } from "../firebase";
 import { concluirDoacaoCarrinho } from "../utils/carrinhoDoacoes";
 import { calcularTotalCarrinho } from "../utils/carrinhoCalculos";
@@ -30,6 +31,8 @@ import {
 const VERDE = "#006838";
 const VERDE_BOTAO = "#348F20";
 const FUNDO = "#FFFCF6";
+const CODIGO_PIX_DEMONSTRACAO =
+  "ALIMENTAMAIS-PIX-DEMONSTRACAO-TCC-2026";
 
 const BANDEIRAS_CARTAO = [
   { id: "elo", nome: "Elo", imagem: require("../assets/images/bandeirasCartao/elo.png") },
@@ -175,8 +178,11 @@ export default function TelaSeuPedido({ navigation, route }) {
   const [finalizando, setFinalizando] = useState(false);
   const [erroValidacao, setErroValidacao] = useState("");
   const [avisoValidacao, setAvisoValidacao] = useState("");
+  const [codigoPixCopiado, setCodigoPixCopiado] = useState(false);
+  const [copiandoCodigoPix, setCopiandoCodigoPix] = useState(false);
   const [parcelas, setParcelas] = useState(1);
   const finalizacaoIniciada = useRef(false);
+  const timerCodigoCopiado = useRef(null);
   const [dadosCartao, setDadosCartao] = useState(DADOS_CARTAO_VAZIOS);
 
   const pedidoRecebido = route?.params?.pedido;
@@ -217,6 +223,15 @@ export default function TelaSeuPedido({ navigation, route }) {
     }
   }, [limiteParcelas, parcelas]);
 
+  useEffect(
+    () => () => {
+      if (timerCodigoCopiado.current) {
+        clearTimeout(timerCodigoCopiado.current);
+      }
+    },
+    []
+  );
+
   function selecionarPagamento(tipo) {
     setPagamento(tipo);
     setDadosCartao(DADOS_CARTAO_VAZIOS);
@@ -229,6 +244,32 @@ export default function TelaSeuPedido({ navigation, route }) {
       ...atuais,
       [pagamento]: bandeira,
     }));
+  }
+
+  async function copiarCodigoPix() {
+    if (copiandoCodigoPix) return;
+
+    setCopiandoCodigoPix(true);
+    try {
+      await Clipboard.setStringAsync(CODIGO_PIX_DEMONSTRACAO);
+      setAvisoValidacao("");
+      setCodigoPixCopiado(true);
+      if (timerCodigoCopiado.current) {
+        clearTimeout(timerCodigoCopiado.current);
+      }
+      timerCodigoCopiado.current = setTimeout(() => {
+        setCodigoPixCopiado(false);
+        timerCodigoCopiado.current = null;
+      }, 2200);
+    } catch (erroCopia) {
+      console.error("Não foi possível copiar o código Pix demonstrativo:", erroCopia);
+      setCodigoPixCopiado(false);
+      setAvisoValidacao(
+        "Não foi possível copiar o código Pix. Tente novamente."
+      );
+    } finally {
+      setCopiandoCodigoPix(false);
+    }
   }
 
   function validarFormulario() {
@@ -469,14 +510,42 @@ export default function TelaSeuPedido({ navigation, route }) {
                     apresentação do TCC.
                   </Text>
                 </View>
-                <View style={styles.avisoPixCopiaCola}>
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={21}
-                    color="#43317D"
-                  />
-                  <Text style={styles.textoCodigoPix}>
-                    Pix Copia e Cola desativado nesta demonstração.
+                <View style={styles.blocoPixCopiaCola}>
+                  <Text style={styles.tituloPixCopiaCola}>
+                    Pix Copia e Cola
+                  </Text>
+                  <View style={styles.campoPixCopiaCola}>
+                    <Text style={styles.codigoPixDemonstracao}>
+                      {CODIGO_PIX_DEMONSTRACAO}
+                    </Text>
+                    <TouchableOpacity
+                      style={[
+                        styles.botaoCopiarPix,
+                        codigoPixCopiado && styles.botaoPixCopiado,
+                      ]}
+                      onPress={copiarCodigoPix}
+                      disabled={copiandoCodigoPix}
+                      activeOpacity={0.75}
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        codigoPixCopiado
+                          ? "Código Pix copiado"
+                          : "Copiar código Pix demonstrativo"
+                      }
+                    >
+                      <Ionicons
+                        name={codigoPixCopiado ? "checkmark" : "copy-outline"}
+                        size={codigoPixCopiado ? 16 : 20}
+                        color={VERDE}
+                      />
+                      {codigoPixCopiado && (
+                        <Text style={styles.textoPixCopiado}>Copiado!</Text>
+                      )}
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.avisoCodigoFicticio}>
+                    Este código é fictício e utilizado apenas para demonstração.
+                    Nenhum pagamento será realizado.
                   </Text>
                 </View>
               </View>
@@ -731,16 +800,22 @@ export default function TelaSeuPedido({ navigation, route }) {
             </TouchableOpacity>
       </ScrollView>
       <Modal
-        visible={Boolean(avisoValidacao)}
+        visible={Boolean(avisoValidacao) || codigoPixCopiado}
         transparent
         animationType="fade"
-        onRequestClose={() => setAvisoValidacao("")}
+        onRequestClose={() => {
+          setAvisoValidacao("");
+          setCodigoPixCopiado(false);
+        }}
         statusBarTranslucent
       >
         <View style={styles.modalSobreposicao}>
           <Pressable
             style={styles.fundoModal}
-            onPress={() => setAvisoValidacao("")}
+            onPress={() => {
+              setAvisoValidacao("");
+              setCodigoPixCopiado(false);
+            }}
             accessibilityRole="button"
             accessibilityLabel="Fechar aviso"
           />
@@ -749,14 +824,32 @@ export default function TelaSeuPedido({ navigation, route }) {
             accessibilityRole="alert"
             accessibilityViewIsModal
           >
-            <View style={styles.modalIcone}>
-              <Ionicons name="alert-circle" size={36} color="#D58A16" />
+            <View
+              style={[
+                styles.modalIcone,
+                codigoPixCopiado && styles.modalIconeSucesso,
+              ]}
+            >
+              <Ionicons
+                name={codigoPixCopiado ? "checkmark" : "alert-circle"}
+                size={codigoPixCopiado ? 25 : 36}
+                color={codigoPixCopiado ? VERDE : "#D58A16"}
+              />
             </View>
-            <Text style={styles.modalTitulo}>Atenção!</Text>
-            <Text style={styles.modalMensagem}>{avisoValidacao}</Text>
+            <Text style={styles.modalTitulo}>
+              {codigoPixCopiado ? "Código copiado!" : "Atenção!"}
+            </Text>
+            <Text style={styles.modalMensagem}>
+              {codigoPixCopiado
+                ? "O código Pix de demonstração foi copiado com sucesso!"
+                : avisoValidacao}
+            </Text>
             <TouchableOpacity
               style={styles.modalBotao}
-              onPress={() => setAvisoValidacao("")}
+              onPress={() => {
+                setAvisoValidacao("");
+                setCodigoPixCopiado(false);
+              }}
               activeOpacity={0.85}
               accessibilityRole="button"
             >
@@ -1319,6 +1412,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF1D8",
   },
 
+  modalIconeSucesso: {
+    backgroundColor: "#DCEBE0",
+  },
+
   modalTitulo: {
     color: VERDE,
     fontFamily: "Poppins_700Bold",
@@ -1414,24 +1511,66 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  avisoPixCopiaCola: {
-    minHeight: 46,
+  blocoPixCopiaCola: {
     width: "100%",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    gap: 6,
+  },
+
+  tituloPixCopiaCola: {
+    color: "#30245D",
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+  },
+
+  campoPixCopiaCola: {
+    minHeight: 48,
+    width: "100%",
+    paddingLeft: 12,
+    paddingRight: 6,
     flexDirection: "row",
     alignItems: "center",
-    gap: 9,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#D6CEEF",
     borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+  },
+
+  codigoPixDemonstracao: {
+    flex: 1,
+    minWidth: 0,
+    color: "#43317D",
+    fontFamily: "Poppins_500Medium",
+    fontSize: 10,
+  },
+
+  botaoCopiarPix: {
+    width: 38,
+    height: 38,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
     backgroundColor: "#F0ECFF",
   },
 
-  textoCodigoPix: {
-    flex: 1,
-    color: "#43317D",
-    fontFamily: "Poppins_500Medium",
-    fontSize: 11,
-    lineHeight: 16,
+  botaoPixCopiado: {
+    width: 82,
+    flexDirection: "row",
+    gap: 3,
+  },
+
+  textoPixCopiado: {
+    color: VERDE,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 9,
+  },
+
+  avisoCodigoFicticio: {
+    color: "#66616F",
+    fontFamily: "Poppins_400Regular",
+    fontSize: 9,
+    lineHeight: 14,
+    textAlign: "center",
   },
 
   avisoDemoCompacto: {
